@@ -188,8 +188,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    base_folder = r'D:\someFolder'
-    json_path = r'C:\Users\Sanjay D\Desktop\validatorTool\Config.json'
+    base_folder = os.environ["BASEDIR"]
+    json_path = os.environ["JSON_PATH"]
     folder_structure = load_json(json_path)
     main_window = MainWindow()
     main_window.show()
