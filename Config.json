@@ -1,0 +1,30 @@
+{
+     "<shotName>_<plate>_<version>_<vendorName>":
+        {
+            "fbx": [
+                "<shotName>_<plate>_(cam|mm_models)_<version>.fbx"
+                ],
+            "images": {
+                "renders": {
+                    "cones": [
+                        "<shotName>_<plate>_<version>_cones_<vendorName>.\\d{4}.jpg"
+                    ],
+                    "spheres": [
+                        "<shotName>_<plate>_<version>_spheres_<vendorName>.\\d{4}.jpg"
+                    ],
+                    "wireframe": [
+                        "<shotName>_<plate>_<version>_wireframe_<vendorName>.\\d{4}.jpg"
+                    ]
+                },
+                "udplate": [
+                    "<shotName>_<plate>_<version>_udplate_<vendorName>.\\d{4}.jpg"
+                ]
+            },
+            "lens": [
+                "<shotName>_<plate>_Id_lens_<version>_<vendorName>.nk"
+            ],
+            "maya": [
+                "<shotName>_<plate>_<version>_camTrack_<vendorName>.ma"
+            ]
+        }
+}
