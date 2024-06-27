@@ -186,6 +186,19 @@ class MainWindow(QMainWindow):
         self.populate_tree(self.data, self.tree_widget.invisibleRootItem())
         self.tree_widget.expandAll()
 
+def CreateDummyFiles():
+    __path = r"D:\radiancefxValidatorTool\someFolder\WB_000_0120_plate-mp01_v0001_Rad\images\renders\spheres"
+    file = "WB_000_0120_plate-mp01_v0001_spheres_Rad.SOMENUM.jpg"
+    import os
+    num = 1
+    TotalFiles = 82
+    for i in range(TotalFiles):
+        new_file = file.replace("SOMENUM", "{:04d}".format(num))
+        path = os.path.join(__path, new_file)
+        with open(path, 'w') as fp:
+            pass
+        num += 1
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     base_folder = os.environ["BASEDIR"]
