@@ -61,8 +61,10 @@ class MainWindow(QMainWindow):
             key = item.text(0)
             if key in structure:
                 path = os.path.join(base_path, key)
-                if os.path.exists(path):
-                    item.setForeground(0, QBrush(QColor('green')))
+                if not os.path.exists(path):
+                    item.setForeground(0, QBrush(QColor('red')))
+                    continue
+                item.setForeground(0, QBrush(QColor('green')))
                 if isinstance(structure[key], dict):
                     if os.path.exists(path):
                         self.check_files(path, structure[key], item)
@@ -71,6 +73,8 @@ class MainWindow(QMainWindow):
                 elif isinstance(structure[key], list):
                     for sub_item in structure[key]:
                         allFiles = os.listdir(path)
+                        TotalFiles = str(len(allFiles))
+                        item.setText(0, key+"("+TotalFiles+")")
                         for eachFile in allFiles:
                             if re.match(sub_item, eachFile):
                                 sub_path = os.path.join(path, eachFile)
@@ -201,6 +205,8 @@ def CreateDummyFiles():
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    # base_folder = r"D:\RaidanceVdxTool\radiancefxValidatorTool\someFolder"
+    # json_path=r"D:\RaidanceVdxTool\radiancefxValidatorTool\Config.json"
     base_folder = os.environ["BASEDIR"]
     json_path = os.environ["JSON_PATH"]
     folder_structure = load_json(json_path)
