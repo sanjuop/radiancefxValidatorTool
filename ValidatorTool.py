@@ -1,13 +1,22 @@
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt, QUrl
 import json
 import re
 import os
+import subprocess
 
 def load_json(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)
+
+# base_folder = r"D:\RaidanceVdxTool\radiancefxValidatorTool\someFolder"
+# json_path=r"D:\RaidanceVdxTool\radiancefxValidatorTool\Config.json"
+base_folder = os.environ["BASEDIR"]
+json_path = os.environ["JSON_PATH"]
+show = ".*"
+vendor = os.environ["VENDOR"]
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -76,29 +85,36 @@ class MainWindow(QMainWindow):
                         TotalFiles = str(len(allFiles))
                         item.setText(0, key+"("+TotalFiles+")")
                         for eachFile in allFiles:
+                            sub_path = os.path.join(path, eachFile)
                             if re.match(sub_item, eachFile):
-                                sub_path = os.path.join(path, eachFile)
                                 if os.path.exists(sub_path):
-                                    if "\\d" in item.child(0).text(0):
-                                        new_item = QTreeWidgetItem([eachFile])
-                                        item.addChild(new_item)
-                                        new_item.setForeground(0, QBrush(QColor('green')))
-                                    else:
-                                        new_item = QTreeWidgetItem([eachFile])
-                                        item.addChild(new_item)
-                                        new_item.setForeground(0, QBrush(QColor('green')))
-                            else:
-                                if "\\d" in item.child(0).text(0):
-                                        new_item = QTreeWidgetItem([eachFile])
-                                        item.addChild(new_item)
-                                        new_item.setForeground(0, QBrush(QColor('red')))
-                                else:
                                     new_item = QTreeWidgetItem([eachFile])
                                     item.addChild(new_item)
+                                    new_item.setData(0, Qt.UserRole, sub_path)
+                                    if "\\d" in item.child(0).text(0):
+                                        new_item.setForeground(0, QBrush(QColor('green')))
+                                    else:
+                                        new_item.setForeground(0, QBrush(QColor('green')))
+                            else:
+                                new_item = QTreeWidgetItem([eachFile])
+                                item.addChild(new_item)
+                                new_item.setData(0, Qt.UserRole, sub_path)
+                                if "\\d" in item.child(0).text(0):
+                                        new_item.setForeground(0, QBrush(QColor('red')))
+                                else:
                                     new_item.setForeground(0, QBrush(QColor('red')))
+                                    
         self.validateButton.setStyleSheet("background-color : green") 
         if self.has_red_items():
             self.validateButton.setStyleSheet("background-color : red")
+        self.tree_widget.itemDoubleClicked.connect(self.on_item_double_clicked)
+    
+    def on_item_double_clicked(self, item, column):
+        # Handle double click event here
+        file_path = item.data(0, Qt.UserRole)
+        url = QUrl.fromLocalFile(os.path.dirname(file_path))
+        QDesktopServices.openUrl(url)
+        # print(f"Double clicked on item: {item.text(0)}, File Path: {file_path}")
         
     def has_red_items(self, item=None):
         if item is None:
@@ -134,32 +150,54 @@ class MainWindow(QMainWindow):
                     sub_item = QTreeWidgetItem([elem])
                     item.addChild(sub_item)
 
-    def replace_placeholders(self, structure, shotName, plate, version, vendorName):
+    def replace_placeholders(self, structure, shotName, plate, dicipline, version, vendorName):
         def recursive_replace(value):
             if isinstance(value, dict):
                 return {k: recursive_replace(v) for k, v in value.items()}
             elif isinstance(value, list):
                 return [recursive_replace(v) for v in value]
             elif isinstance(value, str):
-                return value.replace("<shotName>", shotName)\
-                            .replace("<plate>", plate)\
-                            .replace("<version>", version)\
-                            .replace("<vendorName>", vendorName)
+                if dicipline is None:
+                    return value.replace("<shotName>", shotName)\
+                                .replace("<plate>", plate)\
+                                .replace("<version>", version)\
+                                .replace("<dicipline>_", "")\
+                                .replace("<vendorName>", vendorName)
+                else:
+                    return value.replace("<shotName>", shotName)\
+                                .replace("<plate>", plate)\
+                                .replace("<version>", version)\
+                                .replace("<dicipline>", dicipline)\
+                                .replace("<vendorName>", vendorName)
             return value
         
         return {recursive_replace(k): recursive_replace(v) for k, v in structure.items()}
     
     def extract_components(self, selString):
-        pattern = r'(WB_\d+_\d+)_(plate-\w+)_(v\d+)_(Rad)'
-        match = re.match(pattern, selString)
-        if match:
-            group1 = match.group(1)  # WB_\d+_\d+
-            group2 = match.group(2)  # plate-\w+
-            group3 = match.group(3)  # v\d+
-            group4 = match.group(4)  # Rad
-            return group1, group2, group3, group4
+        if re.search("objTrack|rotoAnim", selString):
+            pattern = r'({}_\d+_\d+)_(plate-mp\d+)_(objTrack|rotoAnim)_(v\d+)_({})'.format(show, vendor)
+            match = re.match(pattern, selString)
+            if match:
+                group1 = match.group(1)  # WB_\d+_\d+
+                group2 = match.group(2)  # plate-\w+
+                group3 = match.group(3)  # dicipline
+                group4 = match.group(4)  # v\d+
+                group5 = match.group(5)  # Rad
+                return group1, group2, group3, group4, group5
+            else:
+                return None
         else:
-            return None
+            pattern = r'({}_\d+_\d+)_(plate-mp\d+)_(v\d+)_({})'.format(show, vendor)
+            match = re.match(pattern, selString)
+            if match:
+                group1 = match.group(1)  # WB_\d+_\d+
+                group2 = match.group(2)  # plate-\w+
+                group3 = None  # dicipline
+                group4 = match.group(3)  # v\d+
+                group5 = match.group(4)  # Rad
+                return group1, group2, group3, group4, group5
+            else:
+                return None
     
     def add_subfolders(self, parent_item, subfolders):
         for subfolder, contents in subfolders.items():
@@ -183,8 +221,8 @@ class MainWindow(QMainWindow):
             self.validateButton.setStyleSheet("background-color : white") 
             return
         self.validateButton.setDisabled(False)
-        shotName, plate, version, vendorName = self.extract_components(currentShot)
-        self.data = self.replace_placeholders(folder_structure, shotName, plate, version, vendorName)
+        shotName, plate, dicipline, version, vendorName = self.extract_components(currentShot)
+        self.data = self.replace_placeholders(folder_structure, shotName, plate, dicipline, version, vendorName)
         # Add the root item
         self.tree_widget.clear()
         self.populate_tree(self.data, self.tree_widget.invisibleRootItem())
@@ -205,10 +243,6 @@ def CreateDummyFiles():
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    # base_folder = r"D:\RaidanceVdxTool\radiancefxValidatorTool\someFolder"
-    # json_path=r"D:\RaidanceVdxTool\radiancefxValidatorTool\Config.json"
-    base_folder = os.environ["BASEDIR"]
-    json_path = os.environ["JSON_PATH"]
     folder_structure = load_json(json_path)
     main_window = MainWindow()
     main_window.show()

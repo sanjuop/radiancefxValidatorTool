@@ -1,30 +1,39 @@
 {
-     "<shotName>_<plate>_<version>_<vendorName>":
+     "<shotName>_<plate>_<dicipline>_<version>_<vendorName>":
         {
             "fbx": [
-                "<shotName>_<plate>_(cam|mm_models)_<version>.fbx"
+                "<shotName>_<plate>_<dicipline>_(cam|mm_models|.*)_<version>.fbx"
                 ],
             "images": {
                 "renders": {
                     "cones": [
-                        "<shotName>_<plate>_<version>_cones_<vendorName>.\\d{4}.jpg"
+                        "<shotName>_<plate>_<dicipline>_cones_<version>_<vendorName>.\\d{4}.jpg"
                     ],
                     "spheres": [
-                        "<shotName>_<plate>_<version>_spheres_<vendorName>.\\d{4}.jpg"
+                        "<shotName>_<plate>_<dicipline>_spheres_<version>_<vendorName>.\\d{4}.jpg"
                     ],
                     "wireframe": [
-                        "<shotName>_<plate>_<version>_wireframe_<vendorName>.\\d{4}.jpg"
+                        "<shotName>_<plate>_<dicipline>_wireframe_<version>_<vendorName>.\\d{4}.jpg"
+                    ],
+                    "perspective": [
+                        "<shotName>_<plate>_<dicipline>_perspective_<version>_<vendorName>.\\d{4}.jpg"
+                    ],
+                    "shaded": [
+                        "<shotName>_<plate>_<dicipline>_shaded_<version>_<vendorName>.\\d{4}.jpg"
+                    ],
+                    "curves": [
+                        "<shotName>_<plate>_<dicipline>_curves_<version>_<vendorName>.\\d{4}.jpg"
                     ]
                 },
                 "udplate": [
-                    "<shotName>_<plate>_<version>_udplate_<vendorName>.\\d{4}.jpg"
+                    "<shotName>_<plate>_udplate_<version>_<vendorName>.\\d{4}.jpg"
                 ]
             },
             "lens": [
                 "<shotName>_<plate>_Id_lens_<version>_<vendorName>.nk"
             ],
             "maya": [
-                "<shotName>_<plate>_<version>_camTrack_<vendorName>.ma"
+                "<shotName>_<plate>_<version>_(camTrack|objTrack|rotoAnim)_<vendorName>.ma"
             ]
         }
 }

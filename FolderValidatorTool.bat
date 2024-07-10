@@ -7,6 +7,7 @@ set PYTHON_FILE=%CWD%ValidatorTool.py
 set BASEDIR=%CWD%someFolder
 set JSON_PATH=%CWD%Config.json
 set PYTHON_FILE=%CWD%ValidatorTool.py
+set VENDOR=Rad
 echo %PYTHONPATH% %PYTHON_FILE%
 %PYTHONPATH% %PYTHON_FILE%
 ::cmd /k
